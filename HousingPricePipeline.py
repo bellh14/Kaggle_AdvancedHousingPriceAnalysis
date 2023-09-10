@@ -54,8 +54,7 @@ class HousingPricePipeline:
         return preprocessing
 
     def split_labels(self):
-        self.labels = self.df['SalePrice']
-        self.drop_feature('SalePrice')
+        self.labels = self.df.pop('SalePrice')
 
     def drop(self):
         null_counts = self.get_features_null_counts()

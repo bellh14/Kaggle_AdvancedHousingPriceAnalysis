@@ -159,12 +159,12 @@ class AdvancedHousingPrices:
         full_pipeline = Pipeline([
             ('preprocessing', self.run_pipeline()),
             ('random_forest', RandomForestRegressor(
-                random_state=42, n_jobs=8, n_estimators=1000)),
+                random_state=42, n_jobs=-1, n_estimators=100)),
         ])
 
         param_grid = [
-            {'random_forest__max_features': [1.0, 'sqrt', 'log2', 0.2, 0.3, 0.4],
-             'random_forest__min_samples_split': [2, 10, 15, 20, 25, 50, 100]},
+            {'random_forest__max_features': [1.0, 'sqrt', 'log2', 0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+             'random_forest__min_samples_split': [2, 4, 5, 10, 15, 20, 25, 50, 100, 250, 500, 1000]},
         ]
         grid_search = GridSearchCV(
             full_pipeline, param_grid, cv=3, scoring='neg_root_mean_squared_error')
@@ -175,13 +175,13 @@ class AdvancedHousingPrices:
               ascending=False, inplace=True).head(10))
 
     def random_forest_tuning(self):
-        max_features = [2, 4, 8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40]
-        min_sample_splits = [2, 4, 6, 8]
+        max_features = [2, 4, 8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 1.0, 'sqrt', 'log2', 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+        min_sample_splits = [2, 4, 6, 8, 10, 12, 14, 16, 20, 25, 50, 100, 250, 500, 1000]
         preprocessing = self.run_pipeline()
         for max_feature in max_features:
             for min_sample_split in min_sample_splits:
                 forest_reg = make_pipeline(preprocessing, RandomForestRegressor(
-                    max_features=max_feature, min_samples_split=min_sample_split, random_state=42, n_jobs=16))
+                    max_features=max_feature, min_samples_split=min_sample_split, random_state=14, n_jobs=32, n_estimators=200))
                 forest_rmses = -cross_val_score(forest_reg, self.pipeline.df, self.pipeline.labels,
                                                 scoring="neg_root_mean_squared_error", cv=10)
                 print(pd.Series(forest_rmses).describe())
